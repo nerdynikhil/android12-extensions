@@ -10,13 +10,13 @@ import timber.log.Timber
 class DynamicColorScheme(
     targetColors: ColorScheme,
     primaryRgb8: Int,
-    boostAccentChroma: Boolean,
 ) : ColorScheme() {
     private val primaryNeutral = Srgb(primaryRgb8).toLinearSrgb().toOklab().toOklch()
 
     // Boost chroma of primary color for accents.
     // This interpolates up to C=0.04 using a scaled hyperbolic tangent.
     private val primaryAccent = primaryNeutral.let { lch ->
+<<<<<<< HEAD
         if (boostAccentChroma) {
             lch.copy(
                 C = if (lch.C < 0.04) {
@@ -25,9 +25,13 @@ class DynamicColorScheme(
                     lch.C
                 }
             )
+=======
+        lch.copy(C = if (lch.C < 0.04) {
+            tanhScaled(lch.C, MIN_ACCENT_CHROMA, MIN_ACCENT_CHROMA_TANH_SCALE) * MIN_ACCENT_CHROMA
+>>>>>>> parent of f8f1e33 (monet: theme: Make accent chroma boosting optional)
         } else {
-            lch
-        }
+            lch.C
+        })
     }
 
     init {
@@ -41,13 +45,19 @@ class DynamicColorScheme(
     override val neutral2 = transformQuantizedColors(targetColors.neutral2, primaryNeutral)
 
     // Main accent color. Generally, this is close to the primary color.
+<<<<<<< HEAD
     override val accent1 = transformQuantizedColors(targetColors.accent1, primaryAccent)
 
     // Secondary accent color. Darker shades of accent1.
     override val accent2 = transformQuantizedColors(targetColors.accent2, primaryAccent)
 
+=======
+    override val accent1 = transformQuantizedColors(targetColors.accent1, primaryNeutral)
+    // Secondary accent color. Darker shades of accent1.
+    override val accent2 = transformQuantizedColors(targetColors.accent2, primaryNeutral)
+>>>>>>> parent of f8f1e33 (monet: theme: Make accent chroma boosting optional)
     // Tertiary accent color. Primary color shifted to the next secondary color via hue offset.
-    override val accent3 = transformQuantizedColors(targetColors.accent3, primaryAccent) { lch ->
+    override val accent3 = transformQuantizedColors(targetColors.accent3, primaryNeutral) { lch ->
         lch.copy(h = lch.h + ACCENT3_HUE_SHIFT_DEGREES)
     }
 
